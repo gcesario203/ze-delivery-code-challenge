@@ -11,3 +11,7 @@ Apesar de eu já ter familiaridade com vários conceitos de **engenharia de soft
 
 Isso explica o *overengineering* deste projeto: a ideia aqui é usar o desafio como laboratório para exercitar esses pontos com mais profundidade.  
 Desde já: me desejem sorte.
+
+# Dia 1.1
+
+Criei um projeto para os testes e criei o domínio rico de parceiro, para atingir 100% de cobertura com testes ricos e válidos, foram criados 18 testes unitários
