@@ -16,7 +16,7 @@ public class CnpjVO
         Value = value;
     }
 
-    private static bool Validate(string cnpj)
+    public static bool Validate(string cnpj)
     {
         if(cnpj.Length != 14)
             return false;
