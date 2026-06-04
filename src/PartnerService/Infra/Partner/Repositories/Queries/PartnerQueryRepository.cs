@@ -4,6 +4,8 @@ using Dapper;
 using PartnerService.Application.Shared.Contracts;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Partner.Repositories;
+using PartnerService.Infra.Partner.Mappers;
+using PartnerService.Infra.Shared.Models;
 
 namespace PartnerService.Infra.Partner.Repositories.Queries;
 
@@ -21,20 +23,24 @@ public class PartnerQueryRepository : IPartnerQueryRepository
         var query = "SELECT * FROM Partners WHERE Document = @Cnpj";
         var parameters = new { Cnpj = cnpj };
 
-        return await _uow.GetDbConnection()
-                         .QueryFirstOrDefaultAsync<PartnerEntity>(query,
-                                                                  parameters,
-                                                                  transaction: _uow.GetDbTransaction() ?? null);
+        var dbModel = await _uow.GetDbConnection()
+                                .QueryFirstOrDefaultAsync<PartnerDbModel>(query,
+                                                                          parameters,
+                                                                          transaction: _uow.GetDbTransaction() ?? null);
+
+        return dbModel?.ToEntity();
     }
 
     public async Task<PartnerEntity> GetByIdAsync(Guid id)
     {
         var query = "SELECT * FROM Partners WHERE Id = @Id";
-        var parameters = new { Id = id };
+        var parameters = new { Id = id.ToString() };
 
-        return await _uow.GetDbConnection()
-                         .QueryFirstOrDefaultAsync<PartnerEntity>(query,
-                                                                  parameters,
-                                                                  transaction: _uow.GetDbTransaction() ?? null);
+        var dbModel = await _uow.GetDbConnection()
+                                .QueryFirstOrDefaultAsync<PartnerDbModel>(query,
+                                                                          parameters,
+                                                                          transaction: _uow.GetDbTransaction() ?? null);
+
+        return dbModel?.ToEntity();
     }
 }

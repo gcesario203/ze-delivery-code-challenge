@@ -1,13 +1,13 @@
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using PartnerService.Domain.Partner.Entities;
+using PartnerService.Infra.Shared.Models;
 
 namespace PartnerService.Infra.Partner.Persistence;
 
-public class PartnerConfiguration : IEntityTypeConfiguration<PartnerEntity>
+public class PartnerConfiguration : IEntityTypeConfiguration<PartnerDbModel>
 {
-    public void Configure(EntityTypeBuilder<PartnerEntity> builder)
+    public void Configure(EntityTypeBuilder<PartnerDbModel> builder)
     {
         builder.ToTable("Partners");
 
@@ -21,12 +21,11 @@ public class PartnerConfiguration : IEntityTypeConfiguration<PartnerEntity>
             .IsRequired()
             .HasMaxLength(255);
 
-        builder.OwnsOne(p => p.Document, d =>
-        {
-            d.Property(doc => doc.Value)
-                .IsRequired()
-                .HasMaxLength(14)
-                .HasColumnName("Document");
-        });
+        builder.Property(p => p.Document)
+            .IsRequired()
+            .HasMaxLength(14);
+
+        builder.HasIndex(p => p.Document)
+            .IsUnique();
     }
 }
