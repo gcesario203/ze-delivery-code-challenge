@@ -1,9 +1,5 @@
-
-using ImTools;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Partner.Repositories;
-using PartnerService.Infra.Partner.Mappers;
-using PartnerService.Infra.Shared.Models;
 using PartnerService.Infra.Shared.Persistence;
 
 namespace PartnerService.Infra.Partner.Repositories.Commands;
@@ -19,47 +15,41 @@ public class PartnerCommandRepository : IPartnerCommandRepository
 
     public async Task AddAsync(PartnerEntity partner)
     {
-        var dbModel = partner.ToDbModel();
 
         var alreadyTracked = _context.ChangeTracker
-            .Entries<PartnerDbModel>()
-            .Any(e => e.Entity.Id == dbModel.Id);
+            .Entries<PartnerEntity>()
+            .Any(e => e.Entity.Id == partner.Id);
 
         if (!alreadyTracked)
-            await _context.Partners.AddAsync(dbModel);
+            await _context.Partners.AddAsync(partner);
 
-        await _context.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(PartnerEntity partner)
     {
-        var dbModel = partner.ToDbModel();
 
         var entry = _context.ChangeTracker
-            .Entries<PartnerDbModel>()
-            .FirstOrDefault(e => e.Entity.Id == dbModel.Id);
+            .Entries<PartnerEntity>()
+            .FirstOrDefault(e => e.Entity.Id == partner.Id);
 
         if (entry != null)
-            entry.CurrentValues.SetValues(dbModel);
+            entry.CurrentValues.SetValues(entry.Entity);
         else
-            _context.Partners.Update(dbModel);
+            _context.Partners.Update(partner);
 
-        await _context.SaveChangesAsync();
     }
 
     public async Task DeleteAsync(PartnerEntity partner)
     {
-        var dbModel = partner.ToDbModel();
 
         var entry = _context.ChangeTracker
-            .Entries<PartnerDbModel>()
-            .FirstOrDefault(e => e.Entity.Id == dbModel.Id);
+            .Entries<PartnerEntity>()
+            .FirstOrDefault(e => e.Entity.Id == partner.Id);
 
         if (entry != null)
             _context.Partners.Remove(entry.Entity);
         else
-            _context.Partners.Remove(dbModel);
+            _context.Partners.Remove(partner);
 
-        await _context.SaveChangesAsync();
     }
 }

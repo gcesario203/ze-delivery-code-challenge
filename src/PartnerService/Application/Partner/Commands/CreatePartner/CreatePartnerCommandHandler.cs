@@ -57,6 +57,8 @@ public sealed class CreatePartnerCommandHandler
 
         await _repository.AddAsync(partner);
 
+        await _unitOfWork.CommitAsync();
+
         await _unitOfWork.CommitTransactionAsync();
 
         _logger.LogInformation("Successfully created partner with document: {Document}", command.Document);

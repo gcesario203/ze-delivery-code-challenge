@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace PartnerService.Infra.Shared.Models;
 
-[Table("Partners")]
 public sealed class PartnerDbModel : IDbModel
 {
     [Key]

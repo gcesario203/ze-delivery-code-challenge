@@ -1,6 +1,7 @@
 
 using System.Data;
 using Microsoft.Extensions.DependencyInjection;
+using PartnerService.Application.Shared.Contracts;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Shared.ValueObjects;
 using PartnerService.Infra.Partner.Repositories.Commands;
@@ -29,12 +30,15 @@ public class PartnerCommandRepositoryUnitTests
         {
 
             var appDbContext = commandScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = commandScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var commandRepository = new PartnerCommandRepository(appDbContext);
 
             var partner = new PartnerEntity("Ze delivery", "Gabriel cesario", new CnpjVO("33557708000105"));
 
             await commandRepository.AddAsync(partner);
+
+            await unitOfWork.CommitAsync();
 
             Assert.NotEqual(Guid.Empty, partner.Id);
 
@@ -44,7 +48,8 @@ public class PartnerCommandRepositoryUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByIdAsync(partnerId);
 
@@ -64,22 +69,26 @@ public class PartnerCommandRepositoryUnitTests
         using (var commandScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = commandScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = commandScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var commandRepository = new PartnerCommandRepository(appDbContext);
 
             var partner = new PartnerEntity("Ze delivery", "Gabriel cesario", new CnpjVO("65409496000105"));
             await commandRepository.AddAsync(partner);
             partnerId = partner.Id;
-
+            await unitOfWork.CommitAsync();
             // Update
             partner.UpdateTradingName("Ze delivery updated");
             await commandRepository.UpdateAsync(partner);
+
+            await unitOfWork.CommitAsync();
         }
 
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByIdAsync(partnerId);
 
@@ -96,21 +105,25 @@ public class PartnerCommandRepositoryUnitTests
         using (var commandScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = commandScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = commandScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var commandRepository = new PartnerCommandRepository(appDbContext);
 
             var partner = new PartnerEntity("Ze delivery", "Gabriel cesario", new CnpjVO("06311678000171"));
             await commandRepository.AddAsync(partner);
             partnerId = partner.Id;
-
+            await unitOfWork.CommitAsync();
             // Delete
             await commandRepository.DeleteAsync(partner);
+
+            await unitOfWork.CommitAsync();
         }
 
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByIdAsync(partnerId);
 

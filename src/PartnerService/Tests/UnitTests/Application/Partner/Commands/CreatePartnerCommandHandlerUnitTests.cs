@@ -101,4 +101,31 @@ public class CreatePartnerCommandHandlerUnitTests
         // Act & Assert
         await Assert.ThrowsAsync<CommandValidationException>(() => handler.Handle(command));
     }
+
+    [Fact]
+    public async Task Handle_ShouldCommitUnitOfWork_WhenCommandIsValid()
+    {
+        var uow = Substitute.For<IUnitOfWork>();
+        var repo = Substitute.For<IPartnerCommandRepository>();
+        var validator = new CreatePartnerCommandValidator();
+        var queryRepo = Substitute.For<IPartnerQueryRepository>();
+        var logger = Substitute.For<ILogger<CreatePartnerCommandHandler>>();
+
+        queryRepo.GetByCnpjAsync(Arg.Any<string>())
+            .Returns((PartnerEntity)null);
+
+        var handler = new CreatePartnerCommandHandler(
+            repo, uow, validator, queryRepo, logger);
+
+        var command = new CreatePartnerCommand
+        {
+            TradingName = "Ze delivery",
+            OwnerName = "Gabriel cesario",
+            Document = "22117401000169"
+        };
+
+        await handler.Handle(command);
+
+        await uow.Received(1).CommitAsync();
+    }
 }

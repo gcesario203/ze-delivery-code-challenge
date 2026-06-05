@@ -6,7 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using PartnerService.Application.Partner.Events;
 using PartnerService.Application.Shared.Contracts;
+using PartnerService.Application.Shared.Events;
 using PartnerService.Domain.Partner.Repositories;
 using PartnerService.Infra.Partner.Repositories.Commands;
 using PartnerService.Infra.Partner.Repositories.Queries;
@@ -45,10 +47,16 @@ public static class DependencyInjection
                 return conn;
             });
         }
-
+        services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPartnerCommandRepository, PartnerCommandRepository>();
         services.AddScoped<IPartnerQueryRepository, PartnerQueryRepository>();
+
+        services.Scan(scan => scan
+            .FromAssemblyOf<PartnerCreatedEventHandler>()
+            .AddClasses(c => c.AssignableTo(typeof(IEventHandler<>)))
+            .AsImplementedInterfaces()
+            .WithTransientLifetime());
 
         return services;
     }

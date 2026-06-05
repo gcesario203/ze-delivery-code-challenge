@@ -1,5 +1,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using PartnerService.Application.Shared.Contracts;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Shared.ValueObjects;
 using PartnerService.Infra.Partner.Repositories.Commands;
@@ -27,12 +28,15 @@ public class PartnerQueryRepositoryUnitTests
         using (var commandScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = commandScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = commandScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var commandRepository = new PartnerCommandRepository(appDbContext);
 
             var partner = new PartnerEntity("Ze delivery", "Gabriel cesario", new CnpjVO("04090644000179"));
 
             await commandRepository.AddAsync(partner);
+
+            await unitOfWork.CommitAsync();
 
             Assert.NotEqual(Guid.Empty, partner.Id);
 
@@ -42,7 +46,8 @@ public class PartnerQueryRepositoryUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByCnpjAsync("04090644000179");
 
@@ -60,7 +65,8 @@ public class PartnerQueryRepositoryUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByCnpjAsync("00000000000000");
 

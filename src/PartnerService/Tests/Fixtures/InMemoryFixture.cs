@@ -3,6 +3,7 @@
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using PartnerService.Application.Shared;
 using PartnerService.Infra.Shared;
 using PartnerService.Infra.Shared.Persistence;
 
@@ -17,6 +18,7 @@ public class InMemoryFixture : IAsyncLifetime
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddInfraShared(new ConfigurationBuilder().Build(), useInMemoryDatabase: true);
+        services.AddApplication();
 
         ServiceProvider = services.BuildServiceProvider();
 

@@ -8,7 +8,7 @@ namespace PartnerService.Infra.Shared.Persistence;
 
 public class AppDbContext : DbContext
 {
-    public DbSet<PartnerDbModel> Partners => Set<PartnerDbModel>();
+    public DbSet<PartnerEntity> Partners => Set<PartnerEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {

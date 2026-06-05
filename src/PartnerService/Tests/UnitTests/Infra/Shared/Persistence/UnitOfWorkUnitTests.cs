@@ -1,5 +1,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
+using PartnerService.Application.Shared.Contracts;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Shared.ValueObjects;
 using PartnerService.Infra.Partner.Repositories.Commands;
@@ -27,7 +28,8 @@ public class UnitOfWorkUnitTests
         using (var scope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = scope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             await unitOfWork.BeginTransactionAsync();
 
             var commandRepository = new PartnerCommandRepository(appDbContext);
@@ -35,6 +37,8 @@ public class UnitOfWorkUnitTests
             var partner = new PartnerEntity("Ze delivery", "Gabriel cesario", new CnpjVO("54017426000187"));
 
             await commandRepository.AddAsync(partner);
+
+            await unitOfWork.CommitAsync();
 
             await unitOfWork.CommitTransactionAsync();
 
@@ -44,7 +48,8 @@ public class UnitOfWorkUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByIdAsync(partnerId);
 
@@ -62,7 +67,8 @@ public class UnitOfWorkUnitTests
         using (var scope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = scope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             await unitOfWork.BeginTransactionAsync();
 
             var commandRepository = new PartnerCommandRepository(appDbContext);
@@ -77,7 +83,8 @@ public class UnitOfWorkUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByCnpjAsync("40092311000142");
 
@@ -93,7 +100,8 @@ public class UnitOfWorkUnitTests
         using (var scope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = scope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             await unitOfWork.BeginTransactionAsync();
 
             var commandRepository = new PartnerCommandRepository(appDbContext);
@@ -104,6 +112,8 @@ public class UnitOfWorkUnitTests
             partner.UpdateTradingName("Ze delivery updated");
             await commandRepository.UpdateAsync(partner);
 
+            await unitOfWork.CommitAsync();
+
             await unitOfWork.CommitTransactionAsync();
 
             partnerId = partner.Id;
@@ -112,7 +122,8 @@ public class UnitOfWorkUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByIdAsync(partnerId);
 
@@ -130,7 +141,8 @@ public class UnitOfWorkUnitTests
         using (var scope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = scope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             await unitOfWork.BeginTransactionAsync();
 
             var commandRepository = new PartnerCommandRepository(appDbContext);
@@ -147,7 +159,8 @@ public class UnitOfWorkUnitTests
         using (var queryScope = _fixture.ServiceProvider.CreateScope())
         {
             var appDbContext = queryScope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var unitOfWork = new UnitOfWork(appDbContext);
+            var eventDispatcher = queryScope.ServiceProvider.GetRequiredService<IDomainEventDispatcher>();
+            var unitOfWork = new UnitOfWork(appDbContext, eventDispatcher);
             var queryRepository = new PartnerQueryRepository(unitOfWork);
             var retrievedPartner = await queryRepository.GetByCnpjAsync("40177245000103");
 

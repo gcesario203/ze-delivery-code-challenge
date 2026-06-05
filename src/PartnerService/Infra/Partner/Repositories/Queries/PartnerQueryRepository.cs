@@ -34,7 +34,7 @@ public class PartnerQueryRepository : IPartnerQueryRepository
     public async Task<PartnerEntity> GetByIdAsync(Guid id)
     {
         var query = "SELECT * FROM Partners WHERE Id = @Id";
-        var parameters = new { Id = id.ToString() };
+        var parameters = new { Id = id };
 
         var dbModel = await _uow.GetDbConnection()
                                 .QueryFirstOrDefaultAsync<PartnerDbModel>(query,

@@ -1,3 +1,4 @@
+using PartnerService.Domain.Partner.Events;
 using PartnerService.Domain.Shared.Entities;
 using PartnerService.Domain.Shared.ValueObjects;
 
@@ -10,6 +11,10 @@ public class PartnerEntity : BaseEntity
     public string OwnerName { get; private set; }
     public CnpjVO Document { get; private set; }
 
+    public PartnerEntity() : base()
+    {
+    }
+    
     public PartnerEntity(Guid id, string tradingName, string ownerName, CnpjVO document)
     : base(id)
     {
@@ -20,6 +25,8 @@ public class PartnerEntity : BaseEntity
     : base()
     {
         Create(tradingName, ownerName, document);
+
+        AddDomainEvent(new PartnerCreatedEvent(Id, tradingName, ownerName, document.Value));
     }
 
     private void Create(string tradingName, string ownerName, CnpjVO document)

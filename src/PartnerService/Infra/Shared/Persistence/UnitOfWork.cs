@@ -3,6 +3,7 @@ using System.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using PartnerService.Application.Shared.Contracts;
+using PartnerService.Domain.Shared.Entities;
 
 namespace PartnerService.Infra.Shared.Persistence;
 
@@ -12,9 +13,12 @@ public class UnitOfWork : IUnitOfWork
 
     private IDbContextTransaction _transaction;
 
-    public UnitOfWork(AppDbContext context)
+    private readonly IDomainEventDispatcher _domainEventDispatcher;
+
+    public UnitOfWork(AppDbContext context, IDomainEventDispatcher domainEventDispatcher)
     {
         _context = context;
+        _domainEventDispatcher = domainEventDispatcher;
     }
 
     public async Task BeginTransactionAsync()
@@ -50,5 +54,25 @@ public class UnitOfWork : IUnitOfWork
             await _transaction.DisposeAsync();
             _transaction = null;
         }
+    }
+
+    public async Task<int> CommitAsync()
+    {
+        // 1. Coleta eventos antes de salvar
+        var events = _context.ChangeTracker
+            .Entries<BaseEntity>()
+            .SelectMany(e => e.Entity.DomainEvents)
+            .ToList();
+
+        var result = await _context.SaveChangesAsync();
+
+        await _domainEventDispatcher.Dispatch(events);
+
+        _context.ChangeTracker
+            .Entries<BaseEntity>()
+            .ToList()
+            .ForEach(e => e.Entity.ClearDomainEvents());
+
+        return result;
     }
 }

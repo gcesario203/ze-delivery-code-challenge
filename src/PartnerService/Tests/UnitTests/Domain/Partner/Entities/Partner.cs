@@ -1,5 +1,6 @@
 
 using PartnerService.Domain.Partner.Entities;
+using PartnerService.Domain.Partner.Events;
 using PartnerService.Domain.Shared.ValueObjects;
 
 namespace PartnerService.Tests.UnitTests.Domain.Partner.Entities;
@@ -162,5 +163,21 @@ public class Partner
 
         // Act & Assert
         Assert.Throws<ArgumentException>(() => partner.UpdateDocument(null));
+    }
+
+    [Fact]
+    public void CreatePartner_ValidData_ShouldCreateADomainEvent()
+    {
+        // Arrange
+        var tradingName = "Test Trading Name";
+        var ownerName = "Test Owner Name";
+        var document = new CnpjVO("12345678000195");
+
+        // Act
+        var partner = new PartnerEntity(tradingName, ownerName, document);
+
+        // Assert
+        Assert.NotEmpty(partner.DomainEvents);
+        Assert.IsType<PartnerCreatedEvent>(partner.DomainEvents.First());
     }
 }
