@@ -2,6 +2,7 @@
 
 using Microsoft.Extensions.Logging;
 using PartnerService.Domain.Partner.Repositories;
+using Wolverine.Attributes;
 
 namespace PartnerService.Application.Partner.Queries.GetById;
 
@@ -17,6 +18,7 @@ public class GetPartnerByIdQueryHandler
         _logger = logger;
     }
 
+    [WolverineHandler]
     public async Task<PartnerViewModel> Handle(GetPartnerByIdQuery query)
     {
         _logger.LogInformation("Handling GetPartnerByIdQuery for Id: {Id}", query.Id);

@@ -1,10 +1,12 @@
 
 
 using System.Data;
+using FluentValidation;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Npgsql;
 using PartnerService.Application.Partner.Events;
 using PartnerService.Application.Shared.Contracts;
@@ -12,7 +14,9 @@ using PartnerService.Application.Shared.Events;
 using PartnerService.Domain.Partner.Repositories;
 using PartnerService.Infra.Partner.Repositories.Commands;
 using PartnerService.Infra.Partner.Repositories.Queries;
+using PartnerService.Infra.Shared.EventBus;
 using PartnerService.Infra.Shared.Persistence;
+using Wolverine;
 
 namespace PartnerService.Infra.Shared;
 
@@ -47,6 +51,7 @@ public static class DependencyInjection
                 return conn;
             });
         }
+        services.AddScoped<IHandlerDispatcher, WolverineHandlerDispatcher>();
         services.AddScoped<IDomainEventDispatcher, DomainEventDispatcher>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPartnerCommandRepository, PartnerCommandRepository>();
@@ -59,5 +64,19 @@ public static class DependencyInjection
             .WithTransientLifetime());
 
         return services;
+    }
+
+    public static IHostBuilder AddWolwerine(this IHostBuilder host)
+    {
+        return host.UseWolverine(opts =>
+        {
+            opts.Discovery.IncludeAssembly(
+                typeof(Application.Shared.DependencyInjection).Assembly);
+
+            opts.UseRuntimeCompilation();
+
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<AppDbContext>();
+            opts.CodeGeneration.AlwaysUseServiceLocationFor<IUnitOfWork>();
+        });
     }
 }

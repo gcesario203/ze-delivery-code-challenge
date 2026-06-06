@@ -1,8 +1,11 @@
+using FluentValidation;
 using Microsoft.Extensions.Logging;
+using PartnerService.Application.Partner.Queries.GetById;
 using PartnerService.Application.Shared.Contracts;
 using PartnerService.Application.Shared.Exceptions;
 using PartnerService.Application.Shared.ValueObjects;
 using PartnerService.Domain.Partner.Repositories;
+using Wolverine.Attributes;
 
 namespace PartnerService.Application.Partner.Commands.CreatePartner;
 
@@ -11,7 +14,7 @@ public sealed class CreatePartnerCommandHandler
     private readonly IPartnerCommandRepository _repository;
     private readonly IUnitOfWork _unitOfWork;
 
-    private readonly CreatePartnerCommandValidator _validator;
+    private readonly IValidator<CreatePartnerCommand> _validator;
 
     private readonly ILogger<CreatePartnerCommandHandler> _logger;
 
@@ -19,7 +22,7 @@ public sealed class CreatePartnerCommandHandler
 
     public CreatePartnerCommandHandler(IPartnerCommandRepository repository,
                                       IUnitOfWork unitOfWork,
-                                      CreatePartnerCommandValidator validator,
+                                      IValidator<CreatePartnerCommand> validator,
                                         IPartnerQueryRepository partnerQueryRepository,
                                       ILogger<CreatePartnerCommandHandler> logger)
     {
@@ -30,7 +33,8 @@ public sealed class CreatePartnerCommandHandler
         _partnerQueryRepository = partnerQueryRepository;
     }
 
-    public async Task Handle(CreatePartnerCommand command)
+    [WolverineHandler]
+    public async Task<PartnerViewModel> Handle(CreatePartnerCommand command)
     {
         _logger.LogInformation("Handling CreatePartnerCommand for document: {Document}", command.Document);
 
@@ -62,5 +66,7 @@ public sealed class CreatePartnerCommandHandler
         await _unitOfWork.CommitTransactionAsync();
 
         _logger.LogInformation("Successfully created partner with document: {Document}", command.Document);
+
+        return partner.ToViewModel();
     }
 }

@@ -1,8 +1,7 @@
-
-
 using System.Data;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using PartnerService.Application.Shared;
 using PartnerService.Infra.Shared;
 using PartnerService.Infra.Shared.Persistence;
@@ -12,28 +11,39 @@ namespace PartnerService.Tests.Fixtures;
 public class InMemoryFixture : IAsyncLifetime
 {
     public IServiceProvider ServiceProvider { get; private set; } = null!;
+    private IHost _host = null!;
 
     public async Task InitializeAsync()
     {
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddInfraShared(new ConfigurationBuilder().Build(), useInMemoryDatabase: true);
-        services.AddApplication();
+        _host = await Host.CreateDefaultBuilder()
+            .ConfigureServices((_, services) =>
+            {
+                services.AddLogging();
+                services.AddInfraShared(new ConfigurationBuilder().Build(), useInMemoryDatabase: true);
+                services.AddApplication();
+            })
+            .AddWolwerine()  // IHostBuilder extension
+            .StartAsync();
 
-        ServiceProvider = services.BuildServiceProvider();
+        ServiceProvider = _host.Services;
 
-        var db = ServiceProvider.GetRequiredService<AppDbContext>();
+        using var scope = ServiceProvider.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureCreatedAsync();
     }
 
     public async Task DisposeAsync()
     {
-        var db = ServiceProvider.GetRequiredService<AppDbContext>();
+        using var scope = ServiceProvider.CreateScope();
+
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         await db.Database.EnsureDeletedAsync();
 
-        // Fecha a conexão âncora
-        var conn = ServiceProvider.GetRequiredService<IDbConnection>();
+        var conn = scope.ServiceProvider.GetRequiredService<IDbConnection>();
         conn.Dispose();
+
+        await _host.StopAsync();
+        _host.Dispose();
     }
 }
 

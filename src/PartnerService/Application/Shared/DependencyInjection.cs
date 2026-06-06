@@ -1,6 +1,10 @@
 // Application/DependencyInjection.cs
 using FluentValidation;
+using Wolverine;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using System.Data;
+using PartnerService.Application.Shared.Contracts;
 
 namespace PartnerService.Application.Shared;
 
