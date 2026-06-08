@@ -1,4 +1,6 @@
 
+using PartnerService.Application.Shared.DataTransferObjects;
+
 namespace PartnerService.Application.Partner.Queries.GetById
 {
     public class PartnerViewModel
@@ -10,5 +12,9 @@ namespace PartnerService.Application.Partner.Queries.GetById
         public string OwnerName { get; set; }
 
         public string Document { get; set; }
+
+        public AddressDTO Address { get; set; }
+
+        public CoverageAreaDTO CoverageArea { get; set; }
     }
 }

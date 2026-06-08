@@ -7,6 +7,7 @@ using PartnerService.Application.Shared.Exceptions;
 using PartnerService.Domain.Partner.Entities;
 using PartnerService.Domain.Partner.Repositories;
 using PartnerService.Domain.Shared.ValueObjects;
+using PartnerService.Tests.Fixtures;
 
 namespace PartnerService.Tests.UnitTests.Application.Partner.Commands;
 
@@ -16,12 +17,7 @@ public class CreatePartnerCommandHandlerUnitTests
     public async Task Handle_ShouldCreatePartner_WhenCommandIsValid()
     {
         // Arrange
-        var command = new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "74310629000174"
-        };
+        var command = PartnerTestData.CreateValidCommand("74310629000174");
 
         var mockRepo = Substitute.For<IPartnerCommandRepository>();
         var mockLogger = Substitute.For<ILogger<CreatePartnerCommandHandler>>();
@@ -76,12 +72,7 @@ public class CreatePartnerCommandHandlerUnitTests
     public async Task Handle_ShouldThrowException_WhenDocumentAlreadyExists()
     {
         // Arrange
-        var command = new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "74310629000174"
-        };
+        var command = PartnerTestData.CreateValidCommand("74310629000174");
 
         var existingPartner = new PartnerEntity("Existing Partner", "Existing Owner", new CnpjVO(command.Document));
 
@@ -117,12 +108,7 @@ public class CreatePartnerCommandHandlerUnitTests
         var handler = new CreatePartnerCommandHandler(
             repo, uow, validator, queryRepo, logger);
 
-        var command = new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "22117401000169"
-        };
+        var command = PartnerTestData.CreateValidCommand("22117401000169");
 
         await handler.Handle(command);
 

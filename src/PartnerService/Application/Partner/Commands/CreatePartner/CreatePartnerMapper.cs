@@ -7,11 +7,14 @@ namespace PartnerService.Application.Partner.Commands.CreatePartner;
 
 public static class CreatePartnerMapper
 {
-    public static PartnerEntity ToDomainEntity(this CreatePartnerCommand command)
+    public static PartnerEntity ToDomainEntity(this CreatePartnerCommand command, AddressVO address, CoverageAreaVO coverageArea)
     {
-        return new PartnerEntity(command.TradingName,
-                                 command.OwnerName,
-                                 new CnpjVO(command.Document)
+        return PartnerEntity.CreatePartner(
+            command.TradingName,
+            command.OwnerName,
+            new CnpjVO(command.Document),
+            address,
+            coverageArea
         );
     }
 }

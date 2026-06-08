@@ -2,7 +2,6 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using PartnerService.Api.Shared.DataObjects;
 using PartnerService.Application.Partner.Commands.CreatePartner;
 using PartnerService.Application.Partner.Queries.GetById;
@@ -26,12 +25,7 @@ public class PartnerCreateEndpointIntegrationTests
     {
         var client = _fixture.CreateClient();
 
-        var response = await client.PostAsJsonAsync("/partners", new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "06369660000120"
-        });
+        var response = await client.PostAsJsonAsync("/partners", PartnerTestData.CreateValidCommand("06369660000120"));
 
         response.StatusCode.Should().Be(HttpStatusCode.Created);
         var content = await response.Content.ReadFromJsonAsync<ApiResponse<PartnerViewModel>>();
@@ -41,6 +35,8 @@ public class PartnerCreateEndpointIntegrationTests
         content.Data!.TradingName.Should().Be("Ze delivery");
         content.Data.OwnerName.Should().Be("Gabriel cesario");
         content.Data.Document.Should().Be("06369660000120");
+        content.Data.Address.Should().NotBeNull();
+        content.Data.CoverageArea.Should().NotBeNull();
     }
 
     [Fact]
@@ -56,7 +52,7 @@ public class PartnerCreateEndpointIntegrationTests
         });
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<ValidationFailure>>>();
+        var content = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<ValidationFailureVO>>>();
 
         content.Should().NotBeNull();
         content!.Success.Should().BeFalse();
@@ -70,18 +66,13 @@ public class PartnerCreateEndpointIntegrationTests
     {
         var client = _fixture.CreateClient();
 
-        var command = new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "06369660000120"
-        };
+        var command = PartnerTestData.CreateValidCommand("22117401000169");
 
         await client.PostAsJsonAsync("/partners", command);
         var response = await client.PostAsJsonAsync("/partners", command);
 
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        var content = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<ValidationFailure>>>();
+        var content = await response.Content.ReadFromJsonAsync<ApiResponse<IEnumerable<ValidationFailureVO>>>();
         content.Should().NotBeNull();
         content!.Success.Should().BeFalse();
         content.Data.Should().Contain(e => e.PropertyName == nameof(CreatePartnerCommand.Document) &&

@@ -12,9 +12,12 @@ using PartnerService.Application.Partner.Events;
 using PartnerService.Application.Shared.Contracts;
 using PartnerService.Application.Shared.Events;
 using PartnerService.Domain.Partner.Repositories;
+using PartnerService.Application.GeoLocalization.Contracts;
+using PartnerService.Infra.GeoLocalization;
 using PartnerService.Infra.Partner.Repositories.Commands;
 using PartnerService.Infra.Partner.Repositories.Queries;
 using PartnerService.Infra.Shared.EventBus;
+using PartnerService.Infra.Shared.Outbox;
 using PartnerService.Infra.Shared.Persistence;
 using Wolverine;
 
@@ -56,6 +59,10 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IPartnerCommandRepository, PartnerCommandRepository>();
         services.AddScoped<IPartnerQueryRepository, PartnerQueryRepository>();
+        services.AddScoped<IOutboxPublisher, OutboxPublisher>();
+        services.AddScoped<IOutboxProcessor, OutboxProcessor>();
+        services.AddSingleton<IGeolocalizationClient, InMemoryGeolocalizationClient>();
+        services.AddHostedService<OutboxProcessorBackgroundService>();
 
         services.Scan(scan => scan
             .FromAssemblyOf<PartnerCreatedEventHandler>()

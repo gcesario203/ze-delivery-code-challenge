@@ -4,7 +4,6 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using PartnerService.Api.Shared.DataObjects;
-using PartnerService.Application.Partner.Commands.CreatePartner;
 using PartnerService.Application.Partner.Queries.GetById;
 using PartnerService.Tests.Fixtures;
 
@@ -25,12 +24,8 @@ public class PartnerGetEndpointIntegrationTests
     {
         var client = _fixture.CreateClient();
 
-        var createResponse = await client.PostAsJsonAsync("/partners", new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "09744933000168"
-        });
+        var createResponse = await client.PostAsJsonAsync("/partners", PartnerTestData.CreateValidCommand("09744933000168"));
+        createResponse.EnsureSuccessStatusCode();
 
         var content = await createResponse.Content.ReadFromJsonAsync<ApiResponse<PartnerViewModel>>();
         var partner = content!.Data!;

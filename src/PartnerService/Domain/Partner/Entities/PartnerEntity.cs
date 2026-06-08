@@ -14,7 +14,7 @@ public class PartnerEntity : BaseEntity
     public PartnerEntity() : base()
     {
     }
-    
+
     public PartnerEntity(Guid id, string tradingName, string ownerName, CnpjVO document)
     : base(id)
     {
@@ -25,8 +25,17 @@ public class PartnerEntity : BaseEntity
     : base()
     {
         Create(tradingName, ownerName, document);
+    }
 
-        AddDomainEvent(new PartnerCreatedEvent(Id, tradingName, ownerName, document.Value));
+    public static PartnerEntity CreatePartner(string tradingName,
+                                       string ownerName,
+                                       CnpjVO document,
+                                       AddressVO address,
+                                       CoverageAreaVO coverageArea)
+    {
+        var partner = new PartnerEntity(tradingName, ownerName, document);
+        partner.AddDomainEvent(new PartnerCreatedEvent(partner.Id, address, coverageArea));
+        return partner;
     }
 
     private void Create(string tradingName, string ownerName, CnpjVO document)

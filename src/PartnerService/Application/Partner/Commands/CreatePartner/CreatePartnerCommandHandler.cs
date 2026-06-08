@@ -1,8 +1,13 @@
 using FluentValidation;
 using Microsoft.Extensions.Logging;
+using PartnerService.Application.GeoLocalization.Contracts;
+using PartnerService.Application.GeoLocalization.DataTransferObjects;
+using PartnerService.Application.GeoLocalization.Events;
 using PartnerService.Application.Partner.Queries.GetById;
 using PartnerService.Application.Shared.Contracts;
+using PartnerService.Application.Shared.DataTransferObjects;
 using PartnerService.Application.Shared.Exceptions;
+using PartnerService.Application.Shared.Mappers;
 using PartnerService.Application.Shared.ValueObjects;
 using PartnerService.Domain.Partner.Repositories;
 using Wolverine.Attributes;
@@ -19,6 +24,7 @@ public sealed class CreatePartnerCommandHandler
     private readonly ILogger<CreatePartnerCommandHandler> _logger;
 
     private readonly IPartnerQueryRepository _partnerQueryRepository;
+
 
     public CreatePartnerCommandHandler(IPartnerCommandRepository repository,
                                       IUnitOfWork unitOfWork,
@@ -43,7 +49,7 @@ public sealed class CreatePartnerCommandHandler
         {
             _logger.LogWarning("Validation failed for CreatePartnerCommand: {Errors}", validationResult.Errors);
             throw new CommandValidationException("Validation failed for CreatePartnerCommand",
-                                                validationResult.Errors.Select(e => new ValidationFailure(e.PropertyName, e.ErrorMessage)));
+                                                validationResult.Errors.Select(e => new ValidationFailureVO(e.PropertyName, e.ErrorMessage)));
         }
 
         var existingPartner = await _partnerQueryRepository.GetByCnpjAsync(command.Document);
@@ -52,12 +58,15 @@ public sealed class CreatePartnerCommandHandler
         {
             _logger.LogWarning("Partner with document {Document} already exists.", command.Document);
             throw new CommandValidationException("Partner with the given document already exists.",
-                                                new List<ValidationFailure> { new ValidationFailure("Document", "Partner with the given document already exists.") });
+                                                new List<ValidationFailureVO> { new ValidationFailureVO("Document", "Partner with the given document already exists.") });
         }
 
         await _unitOfWork.BeginTransactionAsync();
 
-        var partner = command.ToDomainEntity();
+        var partner = command.ToDomainEntity(
+            address: command.Address.ToVO(),
+            coverageArea: command.CoverageArea.ToVO()
+        );
 
         await _repository.AddAsync(partner);
 
@@ -67,6 +76,10 @@ public sealed class CreatePartnerCommandHandler
 
         _logger.LogInformation("Successfully created partner with document: {Document}", command.Document);
 
-        return partner.ToViewModel();
+        return partner.ToViewModel(new PartnerGeolocalizationDTO
+        {
+            Address = command.Address,
+            CoverageArea = command.CoverageArea
+        });
     }
 }

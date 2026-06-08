@@ -1,18 +1,27 @@
 
+using PartnerService.Application.GeoLocalization.DataTransferObjects;
 using PartnerService.Domain.Partner.Entities;
 
 namespace PartnerService.Application.Partner.Queries.GetById;
 
 public static class PartnerMapper
 {
-    public static PartnerViewModel ToViewModel(this PartnerEntity partner)
+    public static PartnerViewModel ToViewModel(this PartnerEntity partner, PartnerGeolocalizationDTO geolocalization)
     {
-        return new PartnerViewModel
+        var partnerViewModel = new PartnerViewModel
         {
             Id = partner.Id.ToString(),
             TradingName = partner.TradingName,
             OwnerName = partner.OwnerName,
-            Document = partner.Document.Value
+            Document = partner.Document.Value,
         };
+
+        if(geolocalization != null)
+        {
+            partnerViewModel.Address = geolocalization.Address;
+            partnerViewModel.CoverageArea = geolocalization.CoverageArea;
+        }
+
+        return partnerViewModel;
     }
 }

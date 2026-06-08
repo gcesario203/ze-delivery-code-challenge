@@ -1,4 +1,5 @@
 using FluentValidation;
+using PartnerService.Application.Shared.Validators;
 using PartnerService.Domain.Shared.ValueObjects;
 
 namespace PartnerService.Application.Partner.Commands.CreatePartner;
@@ -18,5 +19,13 @@ public sealed class CreatePartnerCommandValidator : AbstractValidator<CreatePart
         RuleFor(x => x.Document)
             .NotEmpty().WithMessage("Document is required.")
             .Must(CnpjVO.Validate).WithMessage("Document must be a valid CNPJ.");
+
+        RuleFor(x => x.Address)
+            .NotNull().WithMessage("Address is required.")
+            .SetValidator(new AddressDTOValidator());
+
+        RuleFor(x => x.CoverageArea)
+            .NotNull().WithMessage("Coverage area is required.")
+            .SetValidator(new CoverageAreaDTOValidator());
     }
 }

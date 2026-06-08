@@ -1,5 +1,6 @@
 
 using PartnerService.Domain.Shared.Events;
+using PartnerService.Domain.Shared.ValueObjects;
 
 namespace PartnerService.Domain.Partner.Events;
 
@@ -7,17 +8,16 @@ public sealed class PartnerCreatedEvent : DomainEvent
 {
     public Guid PartnerId { get; }
 
-    public string TradingName { get; }
+    public AddressVO Address { get; }
 
-    public string OwnerName { get; }
+    public CoverageAreaVO CoverageArea { get; }
 
-    public string Document { get; }
-
-    public PartnerCreatedEvent(Guid partnerId, string tradingName, string ownerName, string document)
+    public PartnerCreatedEvent(Guid partnerId,
+                               AddressVO address,
+                               CoverageAreaVO coverageArea)
     {
         PartnerId = partnerId;
-        TradingName = tradingName;
-        OwnerName = ownerName;
-        Document = document;
+        Address = address;
+        CoverageArea = coverageArea;
     }
 }

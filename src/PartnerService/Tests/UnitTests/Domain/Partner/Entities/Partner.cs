@@ -172,9 +172,21 @@ public class Partner
         var tradingName = "Test Trading Name";
         var ownerName = "Test Owner Name";
         var document = new CnpjVO("12345678000195");
+        var address = new AddressVO(new CordinateVO(-23.55052, -46.633308));
+        var coverageArea = new CoverageAreaVO(
+        [
+            [
+                [
+                    new CordinateVO(-23.55052, -46.633308),
+                    new CordinateVO(-23.56052, -46.633308),
+                    new CordinateVO(-23.56052, -46.643308),
+                    new CordinateVO(-23.55052, -46.633308)
+                ]
+            ]
+        ]);
 
         // Act
-        var partner = new PartnerEntity(tradingName, ownerName, document);
+        var partner = PartnerEntity.CreatePartner(tradingName, ownerName, document, address, coverageArea);
 
         // Assert
         Assert.NotEmpty(partner.DomainEvents);

@@ -31,7 +31,7 @@ public class GlobalExceptionsMiddleware
             context.Response.StatusCode = StatusCodes.Status400BadRequest;
             context.Response.ContentType = "application/json";
 
-            var response = new ApiResponse<IEnumerable<ValidationFailure>>(ex.Errors, ex.Message, false);
+            var response = new ApiResponse<IEnumerable<ValidationFailureVO>>(ex.Errors, ex.Message, false);
             await context.Response.WriteAsJsonAsync(response);
         }
         catch (Exception ex)

@@ -1,16 +1,15 @@
 
-using Microsoft.Extensions.Configuration;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NSubstitute;
+using PartnerService.Application.GeoLocalization.Events;
 using PartnerService.Application.Partner.Commands.CreatePartner;
-using PartnerService.Application.Partner.Events;
 using PartnerService.Application.Shared.Contracts;
 using PartnerService.Domain.Partner.Repositories;
-using PartnerService.Infra.Shared;
+using PartnerService.Infra.Shared.Outbox.Enums;
 using PartnerService.Infra.Shared.Persistence;
 using PartnerService.Tests.Fixtures;
-using PartnerService.Application.Shared;
 
 namespace PartnerService.Tests.Integration.Shared.Events;
 
@@ -25,57 +24,27 @@ public class DomainEventsDispatcherIntegrationTests
     }
 
     [Fact]
-    public async Task Dispatch_ShouldLogWhenPartnerCreatedEventIsHandled()
+    public async Task Dispatch_ShouldPersistIntegrationEventInOutbox_WhenPartnerIsCreated()
     {
-        // Arrange
-        var logger = Substitute.For<ILogger<PartnerCreatedEventHandler>>();
-
-        // Cria um scope com o logger substituído
-        var services = new ServiceCollection();
-        services.AddLogging();
-        services.AddInfraShared(new ConfigurationBuilder().Build(), useInMemoryDatabase: true);
-        services.AddApplication();
-
-        services.AddSingleton(logger);
-
-        var provider = services.BuildServiceProvider();
-
-        using var scope = provider.CreateScope();
-
-        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await db.Database.EnsureCreatedAsync();
+        using var scope = _fixture.ServiceProvider.CreateScope();
 
         var commandHandler = new CreatePartnerCommandHandler(
             scope.ServiceProvider.GetRequiredService<IPartnerCommandRepository>(),
             scope.ServiceProvider.GetRequiredService<IUnitOfWork>(),
             new CreatePartnerCommandValidator(),
             scope.ServiceProvider.GetRequiredService<IPartnerQueryRepository>(),
-            scope.ServiceProvider.GetRequiredService<ILogger<CreatePartnerCommandHandler>>()
-        );
+            scope.ServiceProvider.GetRequiredService<ILogger<CreatePartnerCommandHandler>>());
 
-        var cmd = new CreatePartnerCommand
-        {
-            TradingName = "Ze delivery",
-            OwnerName = "Gabriel cesario",
-            Document = "06369660000120"
-        };
+        var createdPartner = await commandHandler.Handle(PartnerTestData.CreateValidCommand("53665844000118"));
 
-        // Act
-        await commandHandler.Handle(cmd);
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var outboxMessage = await db.OutboxMessages
+            .OrderByDescending(message => message.CreatedAt)
+            .FirstAsync(message => message.Payload.Contains(createdPartner.Id));
 
-        // Assert
-        logger.Received(1).Log(
-            LogLevel.Information,
-            Arg.Any<EventId>(),
-            Arg.Is<object>(v =>
-                v.ToString()!.Contains("Ze delivery") &&
-                v.ToString()!.Contains("Gabriel cesario") &&
-                v.ToString()!.Contains("06369660000120")
-            ),
-            Arg.Any<Exception>(),
-            Arg.Any<Func<object, Exception, string>>()
-        );
-
-        await db.Database.EnsureDeletedAsync();
+        outboxMessage.Status.Should().Be(OutboxMessageStatus.Pending);
+        outboxMessage.EventType.Should().Contain(nameof(PartnerCreatedIntegrationEvent));
+        outboxMessage.Payload.Should().Contain("PartnerId");
+        outboxMessage.Payload.Should().Contain("Address");
     }
 }

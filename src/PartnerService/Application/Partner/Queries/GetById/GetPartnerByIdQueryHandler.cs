@@ -1,6 +1,7 @@
 
 
 using Microsoft.Extensions.Logging;
+using PartnerService.Application.GeoLocalization.Contracts;
 using PartnerService.Domain.Partner.Repositories;
 using Wolverine.Attributes;
 
@@ -12,9 +13,14 @@ public class GetPartnerByIdQueryHandler
 
     private readonly ILogger<GetPartnerByIdQueryHandler> _logger;
 
-    public GetPartnerByIdQueryHandler(IPartnerQueryRepository partnerQueryRepository, ILogger<GetPartnerByIdQueryHandler> logger)
+    private readonly IGeolocalizationClient _geolocalizationClient;
+
+    public GetPartnerByIdQueryHandler(IPartnerQueryRepository partnerQueryRepository,
+                                      IGeolocalizationClient geolocalizationClient,
+                                      ILogger<GetPartnerByIdQueryHandler> logger)
     {
         _partnerQueryRepository = partnerQueryRepository;
+        _geolocalizationClient = geolocalizationClient;
         _logger = logger;
     }
 
@@ -32,6 +38,8 @@ public class GetPartnerByIdQueryHandler
 
         _logger.LogInformation("Successfully retrieved partner with Id: {Id}", query.Id);
 
-        return partner.ToViewModel();
+        var geolocalization = await _geolocalizationClient.GetPartnerGeolocalizationAsync(query.Id);
+
+        return partner.ToViewModel(geolocalization);
     }
 }
