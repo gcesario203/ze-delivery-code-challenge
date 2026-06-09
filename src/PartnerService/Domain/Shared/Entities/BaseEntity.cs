@@ -9,6 +9,10 @@ public abstract class BaseEntity : IEntity<Guid>
 
     private readonly List<IDomainEvent> _domainEvents = [];
 
+    public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
+
+    public DateTime? UpdatedAt { get; protected set; }
+
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
     protected BaseEntity()

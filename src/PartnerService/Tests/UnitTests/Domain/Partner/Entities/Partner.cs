@@ -180,6 +180,7 @@ public class Partner
                     new CordinateVO(-23.55052, -46.633308),
                     new CordinateVO(-23.56052, -46.633308),
                     new CordinateVO(-23.56052, -46.643308),
+                    new CordinateVO(-23.55052, -46.643308),
                     new CordinateVO(-23.55052, -46.633308)
                 ]
             ]

@@ -35,6 +35,8 @@ public class PartnerEntity : BaseEntity
     {
         var partner = new PartnerEntity(tradingName, ownerName, document);
         partner.AddDomainEvent(new PartnerCreatedEvent(partner.Id, address, coverageArea));
+
+        partner.CreatedAt = DateTime.UtcNow;
         return partner;
     }
 
@@ -60,6 +62,7 @@ public class PartnerEntity : BaseEntity
             throw new ArgumentException("Trading name is required.");
 
         TradingName = tradingName;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void UpdateOwnerName(string ownerName)
@@ -68,6 +71,7 @@ public class PartnerEntity : BaseEntity
             throw new ArgumentException("Owner name is required.");
 
         OwnerName = ownerName;
+        UpdatedAt = DateTime.UtcNow;
     }
 
     public void UpdateDocument(CnpjVO document)
@@ -76,5 +80,6 @@ public class PartnerEntity : BaseEntity
             throw new ArgumentException("Document is required.");
 
         Document = document;
+        UpdatedAt = DateTime.UtcNow;
     }
 }

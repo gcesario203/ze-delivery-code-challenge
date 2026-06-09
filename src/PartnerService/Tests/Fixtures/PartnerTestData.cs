@@ -32,6 +32,7 @@ public static class PartnerTestData
                             closingPoint,
                             new CordinateDTO { Latitude = -23.56052, Longitude = -46.633308 },
                             new CordinateDTO { Latitude = -23.56052, Longitude = -46.643308 },
+                            new CordinateDTO { Latitude = -23.55052, Longitude = -46.643308 },
                             closingPoint
                         ]
                     ]

@@ -3,10 +3,6 @@ namespace GeolocalizationService.Domain.PartnerGeolocation.Entities;
 using GeolocalizationService.Domain.Shared.Entities;
 using GeolocalizationService.Domain.Shared.ValueObjects;
 
-/// <summary>
-/// Read model de geolocalização sincronizado a partir do PartnerService.
-/// O <see cref="BaseEntity.Id"/> corresponde ao PartnerId de origem.
-/// </summary>
 public class PartnerGeolocationEntity : BaseEntity
 {
     public Guid PartnerId => Id;
@@ -25,8 +21,11 @@ public class PartnerGeolocationEntity : BaseEntity
         SetGeoData(address, coverageArea);
     }
 
-    public static PartnerGeolocationEntity Create(Guid partnerId, AddressVO address, CoverageAreaVO coverageArea) =>
-        new(partnerId, address, coverageArea);
+    public static PartnerGeolocationEntity Create(Guid partnerId, AddressVO address, CoverageAreaVO coverageArea)
+    {
+        var partnerGeolocation = new PartnerGeolocationEntity(partnerId, address, coverageArea);
+        return partnerGeolocation;
+    }
 
     public void Update(AddressVO address, CoverageAreaVO coverageArea) =>
         SetGeoData(address, coverageArea);

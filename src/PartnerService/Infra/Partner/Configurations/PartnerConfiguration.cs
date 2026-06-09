@@ -33,6 +33,13 @@ public class PartnerConfiguration : IEntityTypeConfiguration<PartnerEntity>
                 .IsUnique();
         });
 
+        builder.Property(p => p.CreatedAt)
+            .IsRequired()
+            .HasDefaultValueSql("GETUTCDATE()");
+
+        builder.Property(p => p.UpdatedAt)
+            .IsRequired(false);
+
 
         builder.Ignore(p => p.DomainEvents);
     }

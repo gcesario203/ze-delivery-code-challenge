@@ -1,11 +1,9 @@
 
 
-namespace PartnerService.Application.Shared.Validators;
+namespace GeolocalizationService.Application.Shared.Validators;
 
-using PartnerService.Domain.Shared.Enums;
-using PartnerService.Domain.Shared.ValueObjects;
 using FluentValidation;
-using PartnerService.Application.Shared.DataTransferObjects;
+using GeolocalizationService.Application.Shared.DataTransferObjects;
 
 public class CoverageAreaDTOValidator : AbstractValidator<CoverageAreaDTO>
 {
