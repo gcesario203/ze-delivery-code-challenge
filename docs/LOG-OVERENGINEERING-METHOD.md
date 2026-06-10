@@ -45,3 +45,27 @@ Achei um rolê enorme, sinto que alguma coisa vai ficar com pontas soltas futura
 # Dia 3
 
 Finalizei o serviço de parceiros criando o escopo de API com minimal API! A implementação em si foi trivial com exceção de algumas coisas que o wolwerine precisou para auto-detectar os handler utilizados e o principal(sabia que estava sentindo falta de algo), como que o wolwerine ia disparar os handlers injetados sem bus/mediador? Pelo menos, foi uma abstração tranquila de criar(IHandlerDispatcher). Acertei as injeções de dependencia principalmente da camada de infra para adicionar esses elementos. Com isso, os testes de integração foram triviais, foi MUITO mais tranquilo do que eu imaginei para criar um fixture para a api, com os testes feito e com uma corbertura entre testes de integração e testes unitários de 98%, vamos seguir para a criação do serviço de geolocalização.
+
+# Dia 4
+
+Algumas coisas foram BEM fora do planejado, foi um inferno na terra criar o serviço GRPC e fazer o serviço de parceiros se comunicar e o mais importante que acabei não me atentando: Multipolygon pode acabar gerando geometrias inválidas, logo, tive que validar em ambas camadas de negócios a criação da área de cobertura, lado bom, ao corrigir isto, infelizmente descobri que para fazer a busca não ia ser tão trivial quanto eu pensei pois antes de iniciar o projeto, lembrei que o MongoDb possuia suporte a este tipo de dado e lembrei que uma busca agregada recursiva por hierarquia funcionava muito bem e facil como passo de pipeline do mongo, achei que ia ser trivial da mesma forma,  porém, tive que iniciar uma pipeline onde:
+- abri o aggregate para a criação de pipeline de busca
+- declarei as coordenadas de input como um Point dentro de um BsonArray
+- utilizei esse ponto dentro de uma busca geoNear esférica (achei que ia parar por aquiklkkkkkkkkkkk)
+- descobri via stackoverflow como faziam os maias que além do geoNear, o mongo possui suporte a uma busca chamada geoIntersects
+- adicionei na pipeline utilizando o ponto de input uma query com definição de geoIntersects
+- retornei a lista de itens encontrados mapeados como entidades
+Além disso, a comunicação/eventbus foi um tanto quanto controverso de testar, não quero falar muito sobrekkkkkkkkkkkkkkkkkkkkkkkkkkkkk
+
+# Dia 5
+
+Ao adicionar a apigateway para os serviços, quase fiz a infeliz cagada de utilizar o ocelot, porém, descobri que existem alternativas mais modernas e que se integra nativamente com o .net! O yarp foi uma mão na roda e um colírio para os meus olhos, além de configurar ele para ser o "porteiro" para os serviços, consegui facilmente criar uma service que faz o proxy para a busca de localizações proximas, estava precisando de algo que me deixasse felizkkkkkkkkkkkkkkkkkkkkk
+
+# Dia 5.1
+
+Já tinha descoberto que esse repositório do jeito com mais overengineering possivel sem IA ia me dar uma dor de cabeça estupenda, mas meu amigo....As unicas partes triviais desde que finalizei os serviços, foram a criação do Apigateway e a criação de definições de mensageria/comunicação entre serviços de resto...para compor e dar uma boa cobertura de testes em todos o escopo da piramide (e2e->integration->unit) foi um inferno na terra, envolvendo sujar meu repositorio da GeolocationPartnerServie do mongo para os testes, não me orgulho disso, porém, estava extremamente enfezado da proposta que eu mesmo construi, finalizando o compose, subindo e testando na mão via postman, funcionou, mas me deixou com um grande amargo na minha boca.
+
+# Conclusões finais
+
+- Acredito que para uma solução e com todos os overenginnering propostas, todos os requisitos foram concluídos possuindo além de todo o código criado como base de conhecimento, uma cobertura de testes de 98%.
+- O tempo de desenvolvimento foi enorme, 5 dias com N horas que não consigo mensurar no momento para uma API com esta pequena quantidade de funcionalidades é inviavel fora que só consegui realmente ter problemas que envolvam as tratativas de negócio no dia 4 enquanto criava o repositório do Mongo, isso num ambiente corporativo é impensavel

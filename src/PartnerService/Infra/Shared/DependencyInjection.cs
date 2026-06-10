@@ -14,6 +14,7 @@ using PartnerService.Application.Shared.Events;
 using PartnerService.Domain.Partner.Repositories;
 using PartnerService.Application.GeoLocalization.Contracts;
 using PartnerService.Infra.GeoLocalization;
+using PartnerService.Infra.Messaging;
 using PartnerService.Infra.Partner.Repositories.Commands;
 using PartnerService.Infra.Partner.Repositories.Queries;
 using PartnerService.Infra.Shared.EventBus;
@@ -28,7 +29,8 @@ public static class DependencyInjection
     public static IServiceCollection AddInfraShared(
         this IServiceCollection services,
         IConfiguration configuration,
-        bool useInMemoryDatabase = false)
+        bool useInMemoryDatabase = false,
+        bool useInMemoryGeolocalization = false)
     {
         if (useInMemoryDatabase)
         {
@@ -61,7 +63,16 @@ public static class DependencyInjection
         services.AddScoped<IPartnerQueryRepository, PartnerQueryRepository>();
         services.AddScoped<IOutboxPublisher, OutboxPublisher>();
         services.AddScoped<IOutboxProcessor, OutboxProcessor>();
-        services.AddSingleton<IGeolocalizationClient, InMemoryGeolocalizationClient>();
+        if (useInMemoryGeolocalization || configuration.GetValue("Geolocalization:UseInMemory", false))
+        {
+            services.AddSingleton<IGeolocalizationClient, InMemoryGeolocalizationClient>();
+        }
+        else
+        {
+            services.AddSingleton<IPartnerGeolocationPublisher, RabbitMqPartnerGeolocationPublisher>();
+            services.AddSingleton<IGeolocalizationClient, GrpcGeolocalizationClient>();
+        }
+
         services.AddHostedService<OutboxProcessorBackgroundService>();
 
         services.Scan(scan => scan

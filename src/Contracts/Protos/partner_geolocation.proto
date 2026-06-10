@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+option csharp_namespace = "ZeDelivery.Contracts.Geolocation";
+
+package geolocation;
+
+service PartnerGeolocationService {
+  rpc GetPartnerGeolocationByPartnerId (GetPartnerGeolocationByPartnerIdRequest) returns (PartnerGeolocationResponse);
+  rpc GetNearestPartnerGeolocation (GetNearestPartnerGeolocationRequest) returns (PartnerGeolocationResponse);
+}
+
+message Coordinate {
+  double latitude = 1;
+  double longitude = 2;
+}
+
+message Address {
+  Coordinate coordinates = 1;
+}
+
+message CoverageArea {
+  repeated Polygon polygons = 1;
+}
+
+message Polygon {
+  repeated LinearRing rings = 1;
+}
+
+message LinearRing {
+  repeated Coordinate coordinates = 1;
+}
+
+message GetPartnerGeolocationByPartnerIdRequest {
+  string partner_id = 1;
+}
+
+message GetNearestPartnerGeolocationRequest {
+  Coordinate coordinates = 1;
+}
+
+message PartnerGeolocationResponse {
+  string partner_id = 1;
+  Address address = 2;
+  CoverageArea coverage_area = 3;
+}

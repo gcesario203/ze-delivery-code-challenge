@@ -19,7 +19,10 @@ public class InMemoryFixture : IAsyncLifetime
             .ConfigureServices((_, services) =>
             {
                 services.AddLogging();
-                services.AddInfraShared(new ConfigurationBuilder().Build(), useInMemoryDatabase: true);
+                services.AddInfraShared(
+                    new ConfigurationBuilder().Build(),
+                    useInMemoryDatabase: true,
+                    useInMemoryGeolocalization: true);
                 services.AddApplication();
             })
             .AddWolwerine()  // IHostBuilder extension

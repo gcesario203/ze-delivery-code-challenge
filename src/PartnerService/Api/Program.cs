@@ -11,7 +11,13 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 
 builder.Services.AddApplication();
-builder.Services.AddInfraShared(builder.Configuration, useInMemoryDatabase: true);
+var useInMemoryDatabase = builder.Configuration.GetValue("Database:UseInMemory", false);
+var useInMemoryGeolocalization = builder.Configuration.GetValue("Geolocalization:UseInMemory", false);
+
+builder.Services.AddInfraShared(
+    builder.Configuration,
+    useInMemoryDatabase: useInMemoryDatabase,
+    useInMemoryGeolocalization: useInMemoryGeolocalization);
 builder.Host.AddWolwerine();
 
 
